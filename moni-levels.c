@@ -14,22 +14,31 @@
 int main(){
     int i, j, k;
     pid_t childs[3]={}, padre = getpid();
+    int nivel = 0;
 
     for (i=0; i<3; i++){
         childs[i] = fork();
         if(childs[i] == 0){
+            nivel++;
             childs[0] = fork();
             if (i>=1 && i<=2 && childs[0] == 0){
+                nivel++;
                 for (j=0; j<2; j++){
                     childs[j] = fork();
                     if(childs[j] == 0){
+                        nivel++;
                         if (i == 1 && j == 1) {
                             childs[0] = fork();
                             if (childs[0] == 0){
+                                nivel++;
                                 for (k=0; k<2; k++){
                                     childs[k] = fork();
                                     if (childs[k] == 0){
-                                        if (k == 1) childs[0] = fork();
+                                        nivel++;
+                                        if (k == 1){
+                                            childs[0] = fork();
+                                            if (childs[0] == 0) nivel++;
+                                        }
                                         break;
                                     }
                                 }
@@ -39,6 +48,7 @@ int main(){
                     }
                 }
             }
+            if (i<1 && childs[0] == 0) nivel++;
             break;
         }
     }
@@ -51,6 +61,8 @@ int main(){
     }else{
         sleep(1);
     }
+
+    printf("Proceso %d en nivel %d  \n", getpid(), nivel);
 
     return 0;
 }

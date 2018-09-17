@@ -1,3 +1,12 @@
+/*
+    Padre───┬─hijo1───nieto1─┬─bisnieto1
+            │                └─bisnieto2
+            ├─hijo2───nieto2─┬─bisnieto3
+            │                └─bisnieto4──tataranieto1─┬─chozno1
+            │                                          └─chozno2───5toNieto1
+            └─hijo3───nieto3
+
+*/
 #include<stdlib.h>
 #include<stdio.h>
 #include<unistd.h>
@@ -75,14 +84,13 @@ int main(int argc, char const *argv[])
         sleep(5);
     }
 
-    // printf("%d %d  \n", getpid(), nivel);
+    printf("Proceso %d en nivel %d  \n", getpid(), nivel);
 
-    if (padre==getpid()){
-        // for (i=0; i<8; i++) wait(NULL);
-        printf("Termino el padre\n");
-    }else{
-        printf("Termino el hijo\n");
-    }
+    // if (padre==getpid()){
+    //     printf("Termino el padre\n");
+    // }else{
+    //     printf("Termino el hijo\n");
+    // }
 
     return 0;
 }

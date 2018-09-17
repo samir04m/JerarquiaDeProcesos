@@ -1,9 +1,9 @@
 /* Realizar la siguente estructura
-    Padre ─┬──h1───n1
-           ├──h2───n2───bn1
-           ├──h3───n3───bn2───tn1
-           ├──h4───n4───bn2
-           └──h5───n5
+    Padre ─┬──hijo1───nieto1
+           ├──hijo2───nieto2───bisnieto1
+           ├──hijo3───nieto3───bisnieto2───tataranieto1
+           ├──hijo4───nieto4───bisnieto3
+           └──hijo5───nieto5
 */
 #include <stdio.h>
 #include <unistd.h>
