@@ -12,10 +12,9 @@ int main()
     int fd2[2];
     char buffer[1024];
 
-    if (pipe(fd1) != 0 && pipe(fd2) != 0){
-        perror("Error: La tuberia no se creo!");
-        exit(-1);
-    }
+    if (pipe(fd1)) exit(-1);
+    if (pipe(fd2)) exit(-1);
+
 
     for (i=0; i<2; i++){
         if ( !(childs[i] = fork()) ) break;
@@ -37,14 +36,14 @@ int main()
             close(fd2[1]);
             n = read(fd2[0], buffer, sizeof(buffer));
             buffer[n] = '\0';
-
+            printf("Process %d: leido -> %s\n", getpid(), buffer);
             close(fd2[0]);
         }
     }else{
         close(fd1[0]);
         close(fd2[0]);
         close(fd2[1]);
-        strcpy(buffer, "Hola mundo");
+        strcpy(buffer, "Mensaje del padre");
         write(fd1[1], buffer, strlen(buffer));
         close(fd1[1]);
     }

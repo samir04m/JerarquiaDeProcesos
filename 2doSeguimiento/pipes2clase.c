@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <wait.h>
 #include <string.h>
+#include <sys/types.h> 
 
-int main()
-{
+int main(){
     pid_t childs[3], padre = getpid();
     int fd1[2], fd2[2], i, n;
     char buffer_out[1024], buffer_in[1024];
