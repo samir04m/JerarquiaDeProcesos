@@ -30,13 +30,18 @@ int main()
 
         for (int j=0; j<tam-1; j++){
             read(fd[i][0], &lectura[j], sizeof(char));
-            // printf("Process %d: leido: %c\n", getpid(), lectura[j]);
+            printf("Process %d: leido: %c\n", getpid(), lectura[j]);
 
+        }
+        char lectura2[tam-3];
+        for (int k=2; k<tam-1; k++){
+            lectura2[k-2] = lectura[k];
+            printf("%c en %d\n", lectura[2], k);
         }
         // read(fd[i][0], lectura, tam);
         // printf("Tamano de la lectura %d\n", (int)strlen(lectura));
         write(fd[i+1][1], &tam, sizeof(int));
-        write(fd[i+1][1], lectura, tam);
+        write(fd[i+1][1], lectura2, tam);
         close(fd[i][0]);
         close(fd[i+1][1]);
     }else{
