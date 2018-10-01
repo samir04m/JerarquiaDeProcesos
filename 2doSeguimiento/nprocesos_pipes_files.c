@@ -4,6 +4,8 @@
 #include <wait.h>
 #include <string.h>
 
+int nbytes = 8;
+
 int main()
 {
     pid_t padre = getpid();
@@ -24,24 +26,29 @@ int main()
             if (i != j) close(fd[j][0]);
             if ((i+1) != j) close(fd[j][1]);
         }
-        int tam;
-        read(fd[i][0], &tam, sizeof(int));
-        char lectura[tam];
-
-        for (int j=0; j<tam-1; j++){
+        int TAM;
+        read(fd[i][0], &TAM, sizeof(int));
+        char lectura[TAM];
+        printf("lectura TAM %d\n", TAM);
+        for (int j=0; j<TAM; j++){
             read(fd[i][0], &lectura[j], sizeof(char));
-            printf("Process %d: leido: %c\n", getpid(), lectura[j]);
+            printf("Process %d: leido %d: %c\n", getpid(), j, lectura[j]);
+        }
 
+        int np = nbytes/n;
+        printf("TAM %d np %d\n", TAM, np);
+        char lectura2[TAM-np];
+
+        for (int k=np; k<TAM; k++){
+            lectura2[k-np] = lectura[k];
+            // printf("%c en %d\n", lectura[k], k);
         }
-        char lectura2[tam-3];
-        for (int k=2; k<tam-1; k++){
-            lectura2[k-2] = lectura[k];
-            printf("%c en %d\n", lectura[2], k);
-        }
-        // read(fd[i][0], lectura, tam);
+        TAM = strlen(lectura2);
+        printf("lectura2  TAM %d\n", TAM);
+        // read(fd[i][0], lectura, TAM);
         // printf("Tamano de la lectura %d\n", (int)strlen(lectura));
-        write(fd[i+1][1], &tam, sizeof(int));
-        write(fd[i+1][1], lectura2, tam);
+        write(fd[i+1][1], &TAM, sizeof(int));
+        write(fd[i+1][1], lectura2, TAM);
         close(fd[i][0]);
         close(fd[i+1][1]);
     }else{
@@ -56,21 +63,33 @@ int main()
             exit(-1);
         }
         fseek(archivo, 0, SEEK_END);
-        int tam_file = ftell(archivo);
+        int TAM = ftell(archivo);
         fseek(archivo, 0, 0);
 
-        // tam_file -=  1;
-        char lectura[tam_file];
+        char info[TAM], info2[TAM];
+        TAM -=  1;
 
-        write(fd[0][1], &tam_file, sizeof(int));
-        for (int i=0; i<tam_file-1; i++){
-            lectura[i] = getc(archivo);
-            printf("En la Posicion %d esta %c\n", i, lectura[i]);
-            write(fd[0][1], &lectura[i], sizeof(char ));
+        int restar = 0, c=0;
+        for (int i=0; i<TAM; i++){
+            info[i] = getc(archivo);
+            if (info[i] != '\n'){
+                info2[c] = info[i];
+                c++;
+            }else{
+                restar++;
+            }
         }
         fclose(archivo);
 
-        // lectura[tam_file-1] = '\0';
+        TAM -= restar;
+        nbytes = TAM;
+        write(fd[0][1], &TAM, sizeof(int));
+        for (int k=0; k<TAM; k++){
+            printf("En la Posicion %d esta %c\n", k, info2[k]);
+            write(fd[0][1], &info2[k], sizeof(char));
+        }
+
+        // info[TAM-1] = '\0';
 
         close(fd[0][1]);
     }
