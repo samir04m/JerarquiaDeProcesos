@@ -34,8 +34,8 @@ int main(int argc, char *argv[]){
             buffer = malloc((fsize)*sizeof(char));
 
             while(fgets(buffer, fsize, file1)){
-                buffer[strlen(buffer)-1] = '\0'; //cambio el salto de linea por el final de linea
                 lsize = strlen(buffer);
+                buffer[lsize-1] = '\0'; //cambio el salto de linea por el final de linea
                 write(fd1[1], &lsize, sizeof(int));
                 write(fd1[1], buffer, lsize);
             }
@@ -59,8 +59,8 @@ int main(int argc, char *argv[]){
             buffer = malloc((fsize)*sizeof(char));
 
             while(fgets(buffer, fsize, file2)){
-                buffer[strlen(buffer)-1] = '\0'; //cambio el salto de linea por el final de linea
                 lsize = strlen(buffer);
+                buffer[lsize-1] = '\0'; //cambio el salto de linea por el final de linea
                 write(fd2[1], &lsize, sizeof(int));
                 write(fd2[1], buffer, lsize);
             }

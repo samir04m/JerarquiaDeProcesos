@@ -28,25 +28,26 @@ int main()
                 printf("Erro al abrir el archivo file1\n");
                 exit(-1);
             }
-            char linea[1024];
-            int n_lineas = 0, tam_linea;
-            while(fgets(linea, 1024,file1)){
-                n_lineas ++;
-            }
-            // printf("Numero de lineas %d\n",n_lineas );
+            fseek(file1, 0, SEEK_END);
+            int fsize = ftell(file1);
             fseek(file1, 0, 0);
 
-            write(fd1[1], &n_lineas, sizeof(int));
-            while(fgets(linea, 1024,file1)){
-                linea[strlen(linea)-1] = '\0';
-                printf("%s", linea);
-                // printf("-->%c\n",  linea[strlen(linea)]);
-                tam_linea = strlen(linea)+1;
-                // printf("\ntam_linea %d\n", tam_linea);
-                write(fd1[1], &tam_linea, sizeof(int));
-                write(fd1[1], linea, strlen(linea));
+            int lsize;
+            char *buffer;
+            buffer = malloc((fsize)*sizeof(char));
+
+            while (fgets(buffer, fsize, file1)){
+                lsize = strlen(buffer);
+                buffer[lsize-1] = '\0';
+                write(fd1[1], &lsize, sizeof(int));
+                write(fd1[1], buffer, lsize);
             }
             fclose(file1);
+
+            strcpy(buffer, "<<end1>>");
+            lsize = strlen(buffer);
+            write(fd1[1], &lsize, sizeof(int));
+            write(fd1[1], buffer, lsize);
 
             close(fd1[1]);
         }
@@ -60,25 +61,26 @@ int main()
                 printf("Erro al abrir el archivo file2\n");
                 exit(-1);
             }
-            char linea[1024];
-            int n_lineas = 0, tam_linea;
-            while(fgets(linea, 1024, file2)){
-                n_lineas ++;
-            }
-            // printf("Numero de lineas %d\n",n_lineas );
+            fseek(file2, 0, SEEK_END);
+            int fsize = ftell(file2);
             fseek(file2, 0, 0);
 
-            write(fd2[1], &n_lineas, sizeof(int));
-            while(fgets(linea, 1024,file2)){
-                linea[strlen(linea)-1] = '\0';
-                printf("%s", linea);
-                // printf("-->%c\n",  linea[strlen(linea)]);
-                tam_linea = strlen(linea)+1;
-                // printf("\ntam_linea %d\n", tam_linea);
-                write(fd2[1], &tam_linea, sizeof(int));
-                write(fd2[1], linea, strlen(linea));
+            int lsize;
+            char *buffer;
+            buffer = malloc((fsize)*sizeof(char));
+
+            while (fgets(buffer, fsize, file2)){
+                lsize = strlen(buffer);
+                buffer[lsize-1] = '\0';
+                write(fd2[1], &lsize, sizeof(int));
+                write(fd2[1], buffer, lsize);
             }
             fclose(file2);
+
+            strcpy(buffer, "<<end2>>");
+            lsize = strlen(buffer);
+            write(fd2[1], &lsize, sizeof(int));
+            write(fd2[1], buffer, lsize);
 
             close(fd2[1]);
         }
@@ -87,51 +89,44 @@ int main()
         close(fd1[1]);
         close(fd2[1]);
 
-        char linea[1024];
-        int n_lineas_file1, n_lineas_file2, tam_linea, n;
+        int lsize, sw = 0, end1=0, end2=0;
+        char *buffer1, *buffer2;
 
-        read(fd1[0], &n_lineas_file1, sizeof(int));
-        char lectura1[n_lineas_file1][1024];
+        while(1){
+            if (!end1){
+                read(fd1[0], &lsize, sizeof(int));
+                buffer1 = malloc((lsize)*sizeof(char));
+                read(fd1[0], buffer1, lsize);
 
-        // printf("El padre leyo: \n");
+                if (!strcmp(buffer1, "<<end1>>")){
+                    end1 = 1;
+                    if (sw == 1) break;
+                    else sw++;
+                }else{
+                    for (int a=0; a<lsize; a++) printf("%c", buffer1[a]);
+                    printf("\n");
+                }
+            }
 
-        for (int k=0; k<n_lineas_file1; k++){
-            read(fd1[0], &tam_linea, sizeof(int));
-            n = read(fd1[0], linea, tam_linea-1);
-            linea[n] = '\0';
-            strcpy(lectura1[k], linea);
-            // printf("%s\n", linea);
+            if (!end2){
+                read(fd2[0], &lsize, sizeof(int));
+                buffer2 = malloc((lsize)*sizeof(char));
+                read(fd2[0], buffer2, lsize);
+
+                if (!strcmp(buffer2, "<<end2>>")){
+                    end2 = 1;
+                    if (sw == 1) break;
+                    else sw++;
+                }else{
+                    for (int a=0; a<lsize; a++) printf("%c", buffer2[a]);
+                    printf("\n");
+                }
+            }
         }
-
-        read(fd2[0], &n_lineas_file2, sizeof(int));
-        char lectura2[n_lineas_file2][1024];
-
-        for (int k=0; k<n_lineas_file2; k++){
-            read(fd2[0], &tam_linea, sizeof(int));
-            n = read(fd2[0], linea, tam_linea-1);
-            linea[n] = '\0';
-            strcpy(lectura2[k], linea);
-            // printf("%s\n", linea);
-        }
-
-        for (int a=0; a< n_lineas_file1 + n_lineas_file2; a++){
-            if (a < n_lineas_file1) printf("%s\n", lectura1[a]);;
-            if (a < n_lineas_file2) printf("%s\n", lectura2[a]);;
-        }
-
-
 
 
         close(fd1[0]);
-    }
-
-    if(padre==getpid()){
-        char b[500];
-        sprintf(b,"pstree -lp %d",getpid());
-        system(b);
-        // for( i = 0; i < 3; i++) wait(NULL);
-    }else{
-        sleep(3);
+        close(fd2[0]);
     }
 
     return (0);
